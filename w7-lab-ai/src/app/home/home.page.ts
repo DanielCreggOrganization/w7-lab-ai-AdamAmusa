@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { GeminiAiService } from '../services/gemini-ai.service';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent,
   IonGrid, IonRow, IonCol, IonCard, IonCardContent,
@@ -12,19 +13,29 @@ import {
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { environment } from '../../environments/environment';
 
+
+
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
   standalone: true,
   imports: [
-    // TODO: Add all the Ionic components from the imports above
-    // HINT: Copy each component name from the imports list
+    IonHeader, IonToolbar, IonTitle, IonContent,
+    IonGrid, IonRow, IonCol, IonCard, IonCardContent,
+    IonCardHeader, IonCardTitle, IonItem, IonLabel,
+    IonButton, IonIcon, IonProgressBar, IonText,
+    IonRadioGroup, IonRadio, IonImg, IonTextarea,
+    IonRippleEffect,
     CommonModule,
     FormsModule,
     // YOUR CODE HERE
   ]
 })
 export class HomePage {
+
+constructor(private geminiService: GeminiAiService) {}
+
   // TODO: Add default prompt
   // HINT: Something like "Provide a recipe for these baked goods"
   prompt = '';
@@ -45,49 +56,22 @@ export class HomePage {
 
 
   selectImage(url: string) {
+
     // TODO: Set the selectedImage property
-    // HINT: this.selectedImage = url;
+    this.selectedImage = url;
+    console.log('Selected image:', this.selectedImage);
   }
 
 
   async onSubmit() {
     if (this.isLoading) return;
     this.isLoading = true;
-
     try {
-      const response = await fetch(this.selectedImage);
-      const blob = await response.blob();
-      const base64data = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.readAsDataURL(blob);
-      });
-      const base64String = base64data.split(',')[1];
-
-      const genAI = new GoogleGenerativeAI(environment.apiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
-      const result = await model.generateContent({
-        contents: [{
-          role: 'user',
-          parts: [
-            {
-              inlineData: {
-                mimeType: 'image/jpeg',
-                data: base64String
-              }
-            },
-            { text: this.prompt }
-          ]
-        }]
-      });
-
-      this.output = result.response.text();
-
+      const imageBase64 = await this.geminiService.getImageAsBase64(this.selectedImage);
+      this.output = await this.geminiService.generateRecipe(imageBase64, this.prompt);
     } catch (e) {
       this.output = `Error: ${e instanceof Error ? e.message : 'Something went wrong'}`;
     }
-
     this.isLoading = false;
   }
 
