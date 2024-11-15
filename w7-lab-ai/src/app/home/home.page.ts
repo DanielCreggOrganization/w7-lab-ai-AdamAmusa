@@ -10,8 +10,7 @@ import {
   IonRadioGroup, IonRadio, IonImg, IonTextarea,
   IonRippleEffect
 } from '@ionic/angular/standalone';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { environment } from '../../environments/environment';
+import { Clipboard } from '@capacitor/clipboard';
 
 
 
@@ -33,6 +32,7 @@ import { environment } from '../../environments/environment';
   ]
 })
 export class HomePage {
+  textToCopy: string = '';
 
 constructor(private geminiService: GeminiAiService) {}
 
@@ -60,6 +60,13 @@ constructor(private geminiService: GeminiAiService) {}
     // TODO: Set the selectedImage property
     this.selectedImage = url;
     console.log('Selected image:', this.selectedImage);
+  }
+
+  async copyText() {
+    if (!this.output) return;
+    await Clipboard.write({ string: this.output });
+    this.textToCopy = 'Copied!';
+    setTimeout(() => this.textToCopy = '', 2000);
   }
 
 

@@ -53,17 +53,22 @@
         >
           <ion-icon name="cafe-outline" slot="start"></ion-icon>
           {{ isLoading ? 'Generating...' : 'Generate Recipe' }}
-        </ion-button>
+        </ion-button><ion-icon name="clipboard"></ion-icon> 
       </ion-card-content>
     </ion-card>
 
+
+  
     @if (output) {
       <ion-card>
+              
         <ion-card-header>
           <ion-card-title>Generated Recipe</ion-card-title>
         </ion-card-header>
         <ion-card-content>
           <ion-text [innerHTML]="formattedOutput"></ion-text>
+          <ion-button (click)="copyText()">Copy to Clipboard</ion-button>
+          <ion-icon name="clipboard"></ion-icon>
         </ion-card-content>
       </ion-card>
     }
